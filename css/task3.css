@@ -1,0 +1,16 @@
+body {
+    background-color: #e8f0f4;
+    font-family: sans-serif;
+    text-align: center;
+  }
+  
+  h2 {
+    margin-top: 20px;
+    color: #333;
+  }
+  
+  #chart {
+    margin: auto;
+    width: 800px;
+    height: 500px;
+  }  

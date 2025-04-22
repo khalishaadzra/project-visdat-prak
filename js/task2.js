@@ -1,79 +1,85 @@
-d3.csv("data/cleaned_data.csv").then(data => {
-    // Filter dan parsing
-    data = data.filter(d => d.Age && d.Years_of_Experience && d.Stress_Level);
-    data.forEach(d => {
-      d.Age = Math.floor(+d.Age / 5) * 5; // kelompok usia per 5 tahun
-      d.Years_of_Experience = Math.floor(+d.Years_of_Experience / 5) * 5; // kelompok pengalaman per 5 tahun
-      d.Stress_Level = +d.Stress_Level;
+const width = 800;
+const height = 500;
+const margin = { top: 30, right: 30, bottom: 40, left: 50 };
+
+const svg = d3
+  .select("#chart")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+const g = svg
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
+
+d3.csv("data/cleaned_data.csv").then((data) => {
+  // Convert numeric values
+  data.forEach((d) => {
+    d.Age = +d.Age;
+    d.Years_of_Experience = +d.Years_of_Experience;
+    d.Stress_Level = +d.Stress_Level;
+  });
+
+  // Adjust the age and experience ranges
+  data.forEach((d) => {
+    d.Age = Math.floor(d.Age / 5) * 5; // Group ages in 5-year intervals
+    d.Years_of_Experience = Math.floor(d.Years_of_Experience / 5) * 5; // Group experience in 5-year intervals
+  });
+
+  // Define scales
+  const xScale = d3
+    .scaleLinear()
+    .domain([d3.min(data, (d) => d.Age), d3.max(data, (d) => d.Age)])
+    .range([0, width - margin.left - margin.right])
+    .nice();
+
+  const yScale = d3
+    .scaleLinear()
+    .domain([
+      d3.min(data, (d) => d.Years_of_Experience),
+      d3.max(data, (d) => d.Years_of_Experience),
+    ])
+    .range([height - margin.top - margin.bottom, 0])
+    .nice();
+
+  const zScale = d3
+    .scaleSqrt()
+    .domain([0, d3.max(data, (d) => d.Stress_Level)])
+    .range([5, 20]); // Adjust bubble sizes based on Stress Level
+
+  const colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([1, 5]);
+
+  // Draw circles (scatter plot)
+  g.selectAll("circle")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("cx", (d) => xScale(d.Age))
+    .attr("cy", (d) => yScale(d.Years_of_Experience))
+    .attr("r", (d) => zScale(d.Stress_Level))
+    .style("fill", (d) => colorScale(d.Stress_Level))
+    .style("opacity", 0.7)
+    .on("mouseover", (event, d) => {
+      const tooltip = d3.select("#tooltip");
+      tooltip
+        .style("visibility", "visible")
+        .html(
+          `Age: ${d.Age}<br>Experience: ${d.Years_of_Experience}<br>Stress: ${d.Stress_Level}`
+        );
+    })
+    .on("mousemove", (event) => {
+      d3.select("#tooltip")
+        .style("top", `${event.pageY + 10}px`)
+        .style("left", `${event.pageX + 10}px`);
+    })
+    .on("mouseout", () => {
+      d3.select("#tooltip").style("visibility", "hidden");
     });
-  
-    // Buat agregat data: key = age + experience group
-    const grouped = d3.rollups(
-      data,
-      v => d3.mean(v, d => d.Stress_Level),
-      d => d.Age,
-      d => d.Years_of_Experience
-    );
-  
-    const formattedData = [];
-    grouped.forEach(([age, expArr]) => {
-      expArr.forEach(([experience, avgStress]) => {
-        formattedData.push({
-          age: +age,
-          experience: +experience,
-          avgStress: avgStress
-        });
-      });
-    });
-  
-    const margin = { top: 40, right: 20, bottom: 60, left: 60 },
-          width = 800,
-          height = 500;
-  
-    const svg = d3.select("#chart")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
-  
-    const xVals = [...new Set(formattedData.map(d => d.age))].sort((a,b) => a-b);
-    const yVals = [...new Set(formattedData.map(d => d.experience))].sort((a,b) => a-b);
-  
-    const x = d3.scaleBand().domain(xVals).range([margin.left, width - margin.right]).padding(0.05);
-    const y = d3.scaleBand().domain(yVals).range([margin.top, height - margin.bottom]).padding(0.05);
-  
-    const color = d3.scaleSequential(d3.interpolateReds)
-      .domain(d3.extent(formattedData, d => d.avgStress));
-  
-    // Axis
-    svg.append("g")
-      .attr("transform", `translate(0, ${height - margin.bottom})`)
-      .call(d3.axisBottom(x))
-      .append("text")
-      .attr("x", width / 2)
-      .attr("y", 40)
-      .attr("fill", "black")
-      .text("Age Group");
-  
-    svg.append("g")
-      .attr("transform", `translate(${margin.left}, 0)`)
-      .call(d3.axisLeft(y))
-      .append("text")
-      .attr("x", -40)
-      .attr("y", margin.top - 20)
-      .attr("fill", "black")
-      .text("Experience Group");
-  
-    // Kotak heatmap
-    svg.selectAll("rect")
-      .data(formattedData)
-      .enter()
-      .append("rect")
-      .attr("x", d => x(d.age))
-      .attr("y", d => y(d.experience))
-      .attr("width", x.bandwidth())
-      .attr("height", y.bandwidth())
-      .attr("fill", d => color(d.avgStress))
-      .append("title")
-      .text(d => `Stress: ${d.avgStress.toFixed(2)}`);
-  
-  });  
+
+  // Add axes
+  g.append("g")
+    .attr("transform", `translate(0,${height - margin.top - margin.bottom})`)
+    .call(d3.axisBottom(xScale).ticks(10));
+
+  g.append("g").call(d3.axisLeft(yScale).ticks(10));
+});

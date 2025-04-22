@@ -1,16 +1,11 @@
 body {
-    background-color: #e8f0f4;
-    font-family: sans-serif;
+    background-color: #eaf3f8;
+    font-family: Arial, sans-serif;
     text-align: center;
-  }
-  
-  h2 {
-    margin-top: 20px;
-    color: #333;
+    padding: 20px;
   }
   
   #chart {
     margin: auto;
-    width: 800px;
-    height: 500px;
+    width: 90%;
   }  

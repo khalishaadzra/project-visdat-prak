@@ -12,8 +12,8 @@ d3.csv("data/cleaned_data.csv").then(data => {
   const width = 900, height = 600, radius = Math.min(width, height) / 2.5;
   const depth = 20;
 
-  const pastelColors = ["#FFD1DC", "#FFECB3", "#C8E6C9", "#BBDEFB", "#E1BEE7", "#FFCCBC", "#D1C4E9"];
-
+  const pastelColors = [ "#6886C5", "#FFE0AC", "#FFACB7"];
+  
   const color = d3.scaleOrdinal()
     .domain(dataset.map(d => d.label))
     .range(pastelColors);
@@ -56,13 +56,14 @@ d3.csv("data/cleaned_data.csv").then(data => {
 
   // Label tengah
   svg.selectAll("text")
-    .data(pieData)
-    .enter()
-    .append("text")
-    .attr("transform", d => `translate(${arc.centroid(d)})`)
-    .attr("text-anchor", "middle")
-    .attr("dy", "0.35em")
-    .style("font-size", "14px")
-    .style("fill", "#333")
-    .text(d => `${d.data.label} (${d.data.value})`);
+  .data(pieData)
+  .enter()
+  .append("text")
+  .attr("transform", d => `translate(${arc.centroid(d)})`)
+  .attr("text-anchor", "middle")
+  .attr("dy", "0.35em")
+  .style("font-size", "18px") 
+  .style("font-weight", "800") 
+  .style("fill", "#222")
+  .text(d => `${d.data.label} (${d.data.value})`);
 });

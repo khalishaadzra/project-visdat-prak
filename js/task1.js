@@ -43,16 +43,51 @@ d3.csv("data/cleaned_data.csv").then(data => {
     }
   });
 
-  // Slice bagian atas
+// Tooltip
+const tooltip = d3.select("body").append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0)
+  .style("position", "absolute")
+  .style("background", "#fff")
+  .style("border", "1px solid #ccc")
+  .style("border-radius", "8px")
+  .style("padding", "16px 20px") // lebih besar dari sebelumnya
+  .style("box-shadow", "0 4px 10px rgba(0,0,0,0.25)")
+  .style("font-size", "16px") // lebih besar juga
+  .style("pointer-events", "none")
+  .style("max-width", "220px") // opsional, supaya nggak terlalu panjang
+  .style("z-index", "9999")
+  .style("color", "#222");
+
   svg.selectAll("path.top")
-    .data(pieData)
-    .enter()
-    .append("path")
-    .attr("class", "top")
-    .attr("d", arc)
-    .attr("fill", d => color(d.data.label))
-    .attr("stroke", "#fff")
-    .attr("stroke-width", "2px");
+  .data(pieData)
+  .enter()
+  .append("path")
+  .attr("class", "top")
+  .attr("d", arc)
+  .attr("fill", d => color(d.data.label))
+  .attr("stroke", "#fff")
+  .attr("stroke-width", "2px")
+  .on("mouseover", function (event, d) {
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .attr("transform", "translate(0, -5)");
+
+    tooltip.transition().duration(200).style("opacity", 0.9);
+    tooltip
+      .html(`<strong>${d.data.label}</strong><br/>Jumlah: ${d.data.value}`)
+      .style("left", (event.pageX + 10) + "px")
+      .style("top", (event.pageY - 30) + "px");
+  })
+  .on("mouseout", function () {
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .attr("transform", "translate(0, 0)");
+
+    tooltip.transition().duration(300).style("opacity", 0);
+  });
 
   // Label tengah
   svg.selectAll("text")
@@ -65,5 +100,5 @@ d3.csv("data/cleaned_data.csv").then(data => {
   .style("font-size", "18px") 
   .style("font-weight", "800") 
   .style("fill", "#222")
-  .text(d => `${d.data.label} (${d.data.value})`);
+  .text(d => `${d.data.label}`);
 });

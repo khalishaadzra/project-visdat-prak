@@ -1,172 +1,157 @@
-const margin = { top: 50, right: 120, bottom: 70, left: 60 },
-      width = 960 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
+d3.csv("data/cleaned_data.csv").then(function(data) {
+  const margin = {top: 40, right: 20, bottom: 50, left: 60},
+        width = 700 - margin.left - margin.right,
+        height = 450 - margin.top - margin.bottom;
 
-const chartDiv = d3.select("#chart");
+  const container = d3.select("#heatmap")
+    .append("div")
+    .style("display", "flex")
+    .style("flex-direction", "column")
+    .style("align-items", "center")
+    .style("margin-top", "10px");
 
-const container = chartDiv
-  .append("div")
-  .attr("style", "border: 2px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);");
+  const svg = container.append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-container.append("h2")
-  .text("Hubungan Jam Kerja dan Aktivitas Fisik terhadap Work-Life Balance");
+  const tooltip = d3.select("body")
+    .append("div")
+    .style("opacity", 0)
+    .style("position", "absolute")
+    .style("background-color", "white")
+    .style("border", "1px solid #ccc")
+    .style("padding", "8px")
+    .style("border-radius", "4px")
+    .style("pointer-events", "none")
+    .style("font-size", "12px");
 
-const svg = container.append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", `translate(${margin.left},${margin.top})`);
-
-const tooltip = d3.select("body").append("div")
-  .attr("class", "tooltip");
-
-d3.csv("data/cleaned_data.csv").then(data => {
+  const groupedData = {};
   data.forEach(d => {
-    d.Hours_Worked_Per_Week = +d.Hours_Worked_Per_Week;
-    d.Work_Life_Balance_Rating = +d.Work_Life_Balance_Rating;
+    const hours = +d.Hours_Worked_Per_Week;
+    const rating = +d.Work_Life_Balance_Rating;
+    const activity = d.Physical_Activity.toLowerCase();
 
-    if (d.Hours_Worked_Per_Week < 30) d.bin = "<30";
-    else if (d.Hours_Worked_Per_Week <= 40) d.bin = "30-40";
-    else if (d.Hours_Worked_Per_Week <= 50) d.bin = "40-50";
-    else d.bin = ">50";
+    if (hours >= 20 && hours <= 60) {
+      let bin;
+      if (hours === 60) {
+        bin = 60;
+      } else {
+        bin = Math.floor(hours / 5) * 5;
+      }
+
+      const key = `${bin}_${rating}_${activity}`;
+      if (!groupedData[key]) groupedData[key] = 0;
+      groupedData[key] += 1;
+    }
   });
 
-  const binOrder = ["<30", "30-40", "40-50", ">50"];
-  const activities = Array.from(new Set(data.map(d => d.Physical_Activity)));
+  const xGroups = [20, 25, 30, 35, 40, 45, 50, 55, 60];
+  const yGroups = [1, 2, 3, 4, 5];
 
-  const nested = Array.from(
-    d3.group(data, d => d.Physical_Activity),
-    ([activity, values]) => ({
-      activity,
-      bins: binOrder.map(bin => {
-        const binValues = values.filter(v => v.bin === bin);
-        return {
-          bin,
-          avgWLB: binValues.length ? d3.mean(binValues, v => v.Work_Life_Balance_Rating) : null
-        };
-      })
-    })
-  );
-
-  const x = d3.scalePoint()
-    .domain(binOrder)
+  const xScale = d3.scaleBand()
+    .domain(xGroups)
     .range([0, width])
-    .padding(0.5);
+    .padding(0.05);
 
-  const y = d3.scaleLinear()
-    .domain([0, 5])
-    .range([height, 0]);
+  const yScale = d3.scaleBand()
+    .domain(yGroups)
+    .range([height, 0])
+    .padding(0.05);
 
-  const color = d3.scaleOrdinal()
-    .domain(activities)
-    .range(["#FFB347", "#779ECB", "#77DD77"]);
+  const colorScale = d3.scaleOrdinal()
+    .domain(["daily", "weekly"])
+    .range(["#4c1d3d", "#852e4e"]);
 
-  svg.append("g")
-    .call(d3.axisLeft(y))
-    .call(g => g.select(".domain").attr("stroke-width", 2))
-    .call(g => g.selectAll(".tick line").attr("stroke-width", 1))
-    .call(g => g.selectAll("text").style("font-weight", "bold"));
+  // Draw cells
+  Object.keys(groupedData).forEach(key => {
+    const [bin, rating, activity] = key.split("_");
+    const count = groupedData[key];
+    const binNum = +bin;
+    const binText = binNum === 60 ? "60" : `${binNum}-${binNum+4}`;
 
+    svg.append("rect")
+      .attr("x", xScale(binNum))
+      .attr("y", yScale(+rating))
+      .attr("width", xScale.bandwidth())
+      .attr("height", yScale.bandwidth())
+      .style("fill", colorScale(activity))
+      .style("stroke", "#fff")
+      .on("mouseover", function(event) {
+        tooltip
+          .style("opacity", 1)
+          .html(`<strong>Hours:</strong> ${binText}<br/>
+                 <strong>WLB Rating:</strong> ${rating}<br/>
+                 <strong>Activity:</strong> ${activity}<br/>
+                 <strong>Count:</strong> ${count}`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+        d3.select(this).style("stroke", "#333");
+      })
+      .on("mousemove", function(event) {
+        tooltip
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function() {
+        tooltip.style("opacity", 0);
+        d3.select(this).style("stroke", "#fff");
+      });
+
+      svg.append("text")
+      .attr("x", xScale(binNum) + xScale.bandwidth() / 2)
+      .attr("y", yScale(+rating) + yScale.bandwidth() / 2)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .attr("font-size", "13px") // ➔ Ukuran lebih besar
+      .attr("fill", "#fff")       // ➔ Warna putih
+      .style("font-weight", "bold") // ➔ Tebal biar makin kelihatan
+      .text(count);
+  });
+
+  // X axis
   svg.append("g")
     .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x))
-    .call(g => g.select(".domain").attr("stroke-width", 2))
-    .call(g => g.selectAll(".tick line").attr("stroke-width", 1))
-    .call(g => g.selectAll("text").style("font-weight", "bold"));
+    .call(d3.axisBottom(xScale).tickFormat(d => {
+      if (d === 60) return "60";
+      return `${d}-${d+4}`;
+    }));
 
-  const line = d3.line()
-    .defined(d => d.avgWLB !== null)
-    .x(d => x(d.bin))
-    .y(d => y(d.avgWLB));
-
-  svg.selectAll(".line")
-    .data(nested)
-    .enter()
-    .append("path")
-    .attr("fill", "none")
-    .attr("stroke", d => color(d.activity))
-    .attr("stroke-width", 2.5)
-    .attr("d", d => line(d.bins));
-
-  svg.selectAll(".point-group")
-    .data(nested)
-    .enter()
-    .append("g")
-    .selectAll("circle")
-    .data(d => d.bins.map(b => ({ activity: d.activity, ...b })))
-    .enter()
-    .append("circle")
-    .attr("cx", d => x(d.bin))
-    .attr("cy", d => y(d.avgWLB))
-    .attr("r", 4)
-    .attr("fill", d => color(d.activity))
-    .on("mouseover", function (event, d) {
-      if (d.avgWLB !== null) {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip.html(`
-          <strong>Jam Kerja:</strong> ${d.bin}<br/>
-          <strong>Aktivitas:</strong> ${d.activity}<br/>
-          <strong>Rata-rata WLB:</strong> ${d.avgWLB.toFixed(2)}
-        `)
-        .style("left", (event.pageX + 15) + "px")
-        .style("top", (event.pageY - 30) + "px");
-      }
-    })
-    .on("mouseout", function () {
-      tooltip.transition().duration(500).style("opacity", 0);
-    });
-
-  // Label Y
   svg.append("text")
-    .attr("x", -height / 2)
-    .attr("y", -45)
-    .attr("transform", "rotate(-90)")
     .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", height + 40)
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Hours Worked per Week");
+
+  // Y axis
+  svg.append("g")
+    .call(d3.axisLeft(yScale));
+
+  svg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -40)
     .style("font-size", "14px")
     .style("font-weight", "bold")
     .text("Work-Life Balance Rating");
 
-  // Label X
-  svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", height + 50)
-    .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("font-weight", "bold")
-    .text("Kelompok Jam Kerja");
-
-  // Legend
-  const legend = svg.append("g")
-    .attr("font-family", "sans-serif")
-    .attr("font-size", 12)
-    .attr("text-anchor", "start")
-    .selectAll("g")
-    .data(activities)
-    .join("g")
-    .attr("transform", (d, i) => `translate(${width + 20}, ${i * 20})`);
-
-  legend.append("rect")
-    .attr("x", 0)
-    .attr("width", 15)
-    .attr("height", 15)
-    .attr("fill", d => color(d));
-
-  legend.append("text")
-    .attr("x", 20)
-    .attr("y", 7.5)
-    .attr("dy", "0.32em")
-    .style("font-weight", "bold")
-    .text(d => d);
-
-  const legendBBox = legend.node().getBBox();
-  svg.append("rect")
-    .attr("x", width + 10)
-    .attr("y", legendBBox.y - 10)
-    .attr("width", legendBBox.width + 20)
-    .attr("height", legendBBox.height + 40)
-    .attr("fill", "white")
-    .attr("stroke", "#ccc")
-    .attr("stroke-width", 1)
-    .attr("rx", 5)
-    .lower();
+  const legend = container.append("div")
+    .style("display", "flex")
+    .style("justify-content", "center")
+    .style("margin-top", "10px")
+    .style("gap", "20px");
+  
+  legend.append("div")
+    .style("display", "flex")
+    .style("align-items", "center")
+    .html(`<div style="width: 15px; height: 15px; background-color: #4c1d3d; margin-right: 5px;"></div>Daily Activity`);
+  
+  legend.append("div")
+    .style("display", "flex")
+    .style("align-items", "center")
+    .html(`<div style="width: 15px; height: 15px; background-color: #852e4e; margin-right: 5px;"></div>Weekly Activity`);
 });

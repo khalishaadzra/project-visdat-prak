@@ -1,17 +1,48 @@
 body {
-    background-color: #eaf3f8;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-  
-  #chart {
-    margin: auto;
-    width: 90%;
-  }  
-  
-  .tooltip {
-    font-size: 14px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    color: #333;
-  }
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+#chart {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  max-width: 900px;
+}
+
+.axis path,
+.axis line {
+  stroke: #ccc;
+}
+
+.axis text {
+  fill: #666;
+}
+
+.area {
+  stroke: white;
+  stroke-width: 1px;
+}
+
+.tooltip {
+  position: absolute;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  pointer-events: none;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}

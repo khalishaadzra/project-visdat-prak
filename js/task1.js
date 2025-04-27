@@ -34,7 +34,7 @@ d3.csv("data/cleaned_data.csv").then((data) => {
     .attr("width", width)
     .attr("height", height)
     .append("g")
-    .attr("transform", `translate(${width / 2}, ${height / 2 + depth})`);
+    .attr("transform", `translate(${width / 2}, ${height / 2 - 30})`);
 
   const pieData = pie(dataset);
 

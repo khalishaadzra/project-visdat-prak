@@ -1,10 +1,17 @@
 const svg = d3.select("svg"),
-  width = +svg.attr("width"),
-  height = +svg.attr("height"),
-  margin = { top: 40, right: 30, bottom: 60, left: 60 };
+  legendContainer = d3.select("#legend"),
+  margin = { top: 40, right: 30, bottom: 60, left: 60 },
+  width = parseInt(svg.style("width")) - margin.left - margin.right,
+  height = parseInt(svg.style("height")) - margin.top - margin.bottom;
 
-const chartWidth = width - margin.left - margin.right;
-const chartHeight = height - margin.top - margin.bottom;
+svg
+  .attr(
+    "viewBox",
+    `0 0 ${width + margin.left + margin.right} ${
+      height + margin.top + margin.bottom
+    }`
+  )
+  .attr("preserveAspectRatio", "xMidYMid meet");
 
 const g = svg
   .append("g")
@@ -12,10 +19,11 @@ const g = svg
 
 const tooltip = d3.select(".tooltip");
 
+// Gunakan warna lebih cerah (Hijau, Kuning, Merah)
 const color = d3
   .scaleOrdinal()
   .domain(["Low", "Medium", "High"])
-  .range(["#8dd3c7", "#ffffb3", "#fb8072"]);
+  .range(["#7FD671", "#FFF176", "#f44d4d"]);
 
 d3.csv("data/cleaned_data.csv").then((data) => {
   data.forEach((d) => {
@@ -78,7 +86,7 @@ d3.csv("data/cleaned_data.csv").then((data) => {
   const x0 = d3
     .scaleBand()
     .domain(ageGroups.map((d) => d.label))
-    .range([0, chartWidth])
+    .range([0, width])
     .paddingInner(0.2);
 
   const x1 = d3
@@ -91,13 +99,13 @@ d3.csv("data/cleaned_data.csv").then((data) => {
     .scaleLinear()
     .domain([0, d3.max(nested, (d) => d.Low + d.Medium + d.High)])
     .nice()
-    .range([chartHeight, 0]);
+    .range([height, 0]);
 
   const stacked = d3.stack().keys(stressKeys);
   const groupedData = d3.group(nested, (d) => d.age);
 
   g.append("g")
-    .attr("transform", `translate(0,${chartHeight})`)
+    .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x0))
     .selectAll("text")
     .style("font-size", "12px");
@@ -142,9 +150,11 @@ d3.csv("data/cleaned_data.csv").then((data) => {
       .on("mouseout", () => tooltip.style("display", "none"));
   }
 
+  // Legend
   const legend = d3.select("#legend");
+  // Legend
   stressKeys.forEach((k) => {
-    const item = legend.append("div").attr("class", "legend-item");
+    const item = legendContainer.append("div").attr("class", "legend-item");
     item
       .append("span")
       .attr("class", "legend-color")

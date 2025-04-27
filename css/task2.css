@@ -1,6 +1,47 @@
 body {
   font-family: sans-serif;
   padding: 20px;
+  text-align: center;
+  background: #f9f9f9;
+}
+
+h2 {
+  margin-bottom: 70px;
+}
+
+.chart-container {
+  margin: 0 auto;
+  width: fit-content;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+}
+
+.chart-container:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+svg {
+  display: block;
+  margin: auto;
+}
+
+.caption-x {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.caption-y {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  transform: rotate(-90deg) translateY(-50%);
+  transform-origin: center;
+  font-weight: bold;
 }
 
 .tooltip {
@@ -14,20 +55,25 @@ body {
   display: none;
 }
 
+
 .legend {
-  margin-top: 15px;
+  position: absolute;
+  top: 100px;
+  right: 10px;
   font-size: 13px;
+  text-align: left;
 }
 
 .legend-item {
-  display: inline-block;
-  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
 }
 
 .legend-color {
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   display: inline-block;
-  margin-right: 5px;
-  vertical-align: middle;
+  margin-right: 8px;
+  border-radius: 3px;
 }

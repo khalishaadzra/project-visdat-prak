@@ -103,21 +103,32 @@ class Scatterplot {
       ...new Set(vis.data.map((d) => d.Mental_Health_Condition)),
     ];
 
-    // Initialize scales
+    // Manually define the color scale to ensure "none" gets gray
+    const colorRange = [
+      "#5E4FA2", // Depression
+      "#3288BD", // Anxiety
+      "#ABDDA4", // Burnout
+      "#CCCCCC", // None (gray)
+    ];
+    
+    // Map conditions to appropriate colors
+    const colorMap = {};
+    vis.conditions.forEach((condition, i) => {
+      if (condition.toLowerCase() === "none") {
+        colorMap[condition] = "#888888"; // Gray for "none"
+      } else if (i < colorRange.length - 1) {
+        colorMap[condition] = colorRange[i];
+      } else {
+        // If there are more conditions than colors, use the last color
+        colorMap[condition] = colorRange[colorRange.length - 2];
+      }
+    });
+
+    // Initialize scales with specific color for "none"
     vis.colorScale = d3
       .scaleOrdinal()
-      .range([
-        "#5E4FA2",
-        "#3288BD",
-        "#66C2A5",
-        "#ABDDA4",
-        "#E6F598",
-        "#FEE08B",
-        "#FDAE61",
-        "#F46D43",
-        "#D53E4F",
-      ])
-      .domain(vis.conditions);
+      .domain(vis.conditions)
+      .range(vis.conditions.map(c => colorMap[c] || "#888888"));
 
     vis.xScale = d3.scaleLinear();
     vis.yScale = d3.scaleLinear();

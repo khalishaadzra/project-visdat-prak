@@ -104,9 +104,9 @@ d3.csv("data/cleaned_data.csv").then(function(data) {
       .attr("y", yScale(+rating) + yScale.bandwidth() / 2)
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "central")
-      .attr("font-size", "13px") // ➔ Ukuran lebih besar
-      .attr("fill", "#fff")       // ➔ Warna putih
-      .style("font-weight", "bold") // ➔ Tebal biar makin kelihatan
+      .attr("font-size", "13px")
+      .attr("fill", "#fff")     
+      .style("font-weight", "bold") 
       .text(count);
   });
 

@@ -1,6 +1,3 @@
-/**
- * Load data from CSV file asynchronously and render scatter plot
- */
 let data, scatterplot;
 
 // Load the data
@@ -26,9 +23,6 @@ d3.csv("data/cleaned_data.csv")
   })
   .catch((error) => console.error("Error loading data:", error));
 
-/**
- * Generate insights from the data
- */
 function generateInsights(data) {
   // Group data by mental health condition
   const conditionGroups = d3.group(data, (d) => d.Mental_Health_Condition);
@@ -60,10 +54,6 @@ function generateInsights(data) {
   document.getElementById("insights").innerHTML = insights;
 }
 
-/**
- * Event listeners
- */
-
 // Listen to window resize event and update the chart
 let pageLoad = true;
 d3.select(window).on("resize", () => {
@@ -92,9 +82,6 @@ class Scatterplot {
     this.initVis();
   }
 
-  /**
-   * We initialize scales/axes and append static elements, such as axis titles.
-   */
   initVis() {
     let vis = this;
 
@@ -105,17 +92,17 @@ class Scatterplot {
 
     // Manually define the color scale to ensure "none" gets gray
     const colorRange = [
-      "#5E4FA2", // Depression
-      "#3288BD", // Anxiety
-      "#ABDDA4", // Burnout
-      "#CCCCCC", // None (gray)
+      "#5E4FA2", 
+      "#3288BD", 
+      "#ABDDA4", 
+      "#CCCCCC",
     ];
     
     // Map conditions to appropriate colors
     const colorMap = {};
     vis.conditions.forEach((condition, i) => {
       if (condition.toLowerCase() === "none") {
-        colorMap[condition] = "#888888"; // Gray for "none"
+        colorMap[condition] = "#888888"; 
       } else if (i < colorRange.length - 1) {
         colorMap[condition] = colorRange[i];
       } else {
@@ -172,9 +159,6 @@ class Scatterplot {
     this.createLegend();
   }
 
-  /**
-   * Create a legend for mental health conditions
-   */
   createLegend() {
     let vis = this;
 
@@ -205,9 +189,6 @@ class Scatterplot {
     });
   }
 
-  /**
-   * Filter data based on selected conditions
-   */
   filterData() {
     let vis = this;
 
@@ -229,9 +210,6 @@ class Scatterplot {
     vis.updateVis();
   }
 
-  /**
-   * Prepare the data and scales before rendering
-   */
   updateVis() {
     let vis = this;
 
@@ -293,9 +271,6 @@ class Scatterplot {
     vis.renderVis();
   }
 
-  /**
-   * Bind data to visual elements
-   */
   renderVis() {
     let vis = this;
 
@@ -366,9 +341,6 @@ class Scatterplot {
       .attr("stroke-dasharray", "5,5");
   }
 
-  /**
-   * Calculate a simple trend line
-   */
   calculateTrendLine(data) {
     const xMean = d3.mean(data, (d) => d.Age);
     const yMean = d3.mean(data, (d) => d.Social_Isolation_Rating);

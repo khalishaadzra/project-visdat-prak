@@ -1,6 +1,5 @@
 // Full 3D-style Pie Chart with Multiple Slices
 d3.csv("data/cleaned_data.csv").then((data) => {
-  // Normalisasi data: Jika kosong, ubah menjadi "None"
   data.forEach(d => {
     if (!d.Mental_Health_Condition || d.Mental_Health_Condition.trim() === "") {
       d.Mental_Health_Condition = "None";

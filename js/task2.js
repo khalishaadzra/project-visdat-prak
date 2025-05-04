@@ -21,7 +21,7 @@ const tooltip = d3.select(".tooltip");
 const color = d3
   .scaleOrdinal()
   .domain(["Low", "Medium", "High"])
-  .range(["#7FD671", "#FFF176", "#f44d4d"]);
+  .range(["#B2E5A1", "#FFF6A6", "#F7A1A1"]);
 
 d3.csv("data/cleaned_data.csv").then((data) => {
   data.forEach((d) => {

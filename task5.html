@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Age and Social Isolation Impact on Mental Health</title>
+    <title>Dampak Usia dan Isolasi Sosial terhadap Kesehatan Mental</title>
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
     <link rel="stylesheet" href="css/task5.css" />
     <link
@@ -11,7 +11,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>Age and Social Isolation Impact on Mental Health</h1>
+      <h1>Task 5: Dampak Usia dan Isolasi Sosial terhadap Kesehatan Mental</h1>
 
       <div id="scatterplot"></div>
 
@@ -28,4 +28,15 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="js/task5.js"></script>
   </body>
+  <script>
+    function resizeParent() {
+      setTimeout(() => {
+        const height = document.documentElement.scrollHeight;
+        window.parent.postMessage({ type: "setHeight", height: height }, "*");
+      }, 100); // 100 ms delay
+    }
+  
+    window.addEventListener("load", resizeParent);
+    window.addEventListener("resize", resizeParent);
+  </script>
 </html>

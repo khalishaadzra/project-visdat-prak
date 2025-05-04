@@ -124,8 +124,8 @@ d3.csv("data/cleaned_data.csv").then(function(data) {
   const legend = container.append("div")
     .style("display", "flex")
     .style("justify-content", "center")
-    .style("margin-top", "20px")
-    .style("gap", "30px")
+    .style("margin-top", "10px")
+    .style("gap", "15px")
     .style("font-size", "15px");
 
   legend.append("div")
